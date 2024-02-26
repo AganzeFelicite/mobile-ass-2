@@ -46,7 +46,7 @@ class _LearnFlutterState extends State<LearnFlutter> {
               margin: const EdgeInsets.all(10),
               padding: const EdgeInsets.all(10),
               width: double.infinity,
-              color: Colors.blue[300],
+              color: Colors.white,
               child: const Center(
                 child: Text('This is a text widget',
                     style: TextStyle(
@@ -57,7 +57,7 @@ class _LearnFlutterState extends State<LearnFlutter> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isSwitch ? Colors.green : Colors.blue,
+                backgroundColor: Colors.white,
               ),
               onPressed: () {
                 debugPrint('Elevated Button');
@@ -68,9 +68,7 @@ class _LearnFlutterState extends State<LearnFlutter> {
               height: 10,
             ),
             OutlinedButton(
-              onPressed: () {
-                debugPrint('Outlined Button');
-              },
+              onPressed: () {},
               child: const Text('Outlined Button'),
             ),
             const SizedBox(
@@ -95,7 +93,7 @@ class _LearnFlutterState extends State<LearnFlutter> {
                     color: Colors.blue,
                   ),
                   Text('Row widget'),
-                  Icon(Icons.local_fire_department, color: Colors.yellow),
+                  Icon(Icons.local_fire_department, color: Colors.blue),
                 ],
               ),
             ),

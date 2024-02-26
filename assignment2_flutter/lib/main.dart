@@ -4,23 +4,65 @@ import 'package:flutter/material.dart';
 import 'package:helloworld/calculator.dart';
 import 'package:helloworld/home.dart';
 import 'package:helloworld/profile.dart';
+import 'package:helloworld/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isDarkMode = prefs.getBool('darkMode') ?? false;
+
+  runApp(MyApp(isDarkMode: isDarkMode));
+}
+
+class MyApp extends StatefulWidget {
+  final bool isDarkMode;
+
+  const MyApp({Key? key, required this.isDarkMode}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isDarkMode = true;
+
+  @override
+  void initState() {
+    super.initState();
+    isDarkMode = widget.isDarkMode;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.amber),
       debugShowCheckedModeBanner: false,
-      home: const RootPage(),
+      theme: isDarkMode
+          ? ThemeData(
+              brightness: Brightness.dark,
+            )
+          : ThemeData(
+              brightness: Brightness.light,
+            ),
+      // home: RootPage(
+      //   onThemeChanged: (bool isDarkMode) {
+      //     setState(() {
+      //       this.isDarkMode = isDarkMode;
+      //     });
+      //   },
+      // ),
+      home: Login(),
     );
   }
 }
 
 class RootPage extends StatefulWidget {
-  const RootPage({super.key});
+  final Function(bool) onThemeChanged;
+
+  const RootPage({Key? key, required this.onThemeChanged}) : super(key: key);
+
+  @override
   _RootPageState createState() => _RootPageState();
 }
 
@@ -36,20 +78,37 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber.shade50,
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
         title: const Text(
           'My app',
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.brightness_4),
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              bool darkMode = prefs.getBool('darkMode') ?? false;
+
+              setState(() {
+                darkMode = !darkMode;
+                widget.onThemeChanged(darkMode);
+                prefs.setBool('darkMode', darkMode);
+              });
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
-        backgroundColor: Colors.amberAccent.shade100,
+        backgroundColor: Colors.grey.shade200,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              accountName: const Text('Student'),
-              accountEmail: const Text('Aganz1844'),
+              accountName: const Text('Student',
+                  style: TextStyle(fontSize: 15, color: Colors.black)),
+              accountEmail: const Text('Aganz1844',
+                  style: TextStyle(fontSize: 15, color: Colors.black)),
               currentAccountPicture: CircleAvatar(
                 child: CircleAvatar(
                   backgroundImage: NetworkImage(
@@ -66,24 +125,26 @@ class _RootPageState extends State<RootPage> {
         ),
       ),
       body: pages[currentPage],
-      bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home, color: Colors.amber),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, color: Colors.white),
             label: 'Home',
           ),
-          NavigationDestination(
-              icon: Icon(Icons.calculate, color: Colors.amber),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calculate, color: Colors.white),
               label: 'Calculator'),
-          NavigationDestination(
-              icon: Icon(Icons.person, color: Colors.amber), label: 'People'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person, color: Colors.white), label: 'People'),
         ],
-        onDestinationSelected: (int index) {
+        currentIndex: currentPage,
+        onTap: (int index) {
           setState(() {
             currentPage = index;
           });
         },
-        selectedIndex: currentPage,
+        selectedItemColor: Colors.white,
+        // backgroundColor: Colors.blue,
       ),
     );
   }
@@ -93,14 +154,13 @@ class _RootPageState extends State<RootPage> {
       title: Text(title),
       leading: Icon(icon),
       onTap: () {
-        // Navigate to the corresponding page and update the selected index
-        Navigator.pop(context); // Close the drawer
+        Navigator.pop(context);
         setState(() {
           currentPage = index;
           selectedDrawerIndex = index;
         });
       },
-      selected: selectedDrawerIndex == index, // Highlight the selected item
+      selected: selectedDrawerIndex == index,
     );
   }
 }
